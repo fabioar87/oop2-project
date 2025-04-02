@@ -11,3 +11,7 @@ Steps to develop this project:
 
 The main target will be simple. No external library (or at least the minimum external library).
 Working on problems using built in collection.
+Topic of choice: Graph problem and applications.
+
+## Graph Theory
+This project will explore graph algorithms and its implementation using Java language.
