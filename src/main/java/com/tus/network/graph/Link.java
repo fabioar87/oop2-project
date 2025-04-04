@@ -1,11 +1,10 @@
 package com.tus.network.graph;
 
-public class Edge {
+public class Link {
     public final Integer from;
     public final Integer to;
 
-
-    public Edge(Integer from, Integer to){
+    public Link(Integer from, Integer to){
         this.from = from;
         this.to = to;
     }
