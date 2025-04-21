@@ -9,6 +9,10 @@ public class Link {
         this.to = to;
     }
 
+    public Link reverse(){
+        return new Link(to, from);
+    }
+
     public Integer getFrom(){
         return from;
     }
