@@ -1,5 +1,7 @@
 package com.tus.network.graph;
 
+import com.tus.network.graph.link.Link;
+
 import java.util.List;
 
 public class ConnectivityNetwork<N> extends Network<N, Link> {

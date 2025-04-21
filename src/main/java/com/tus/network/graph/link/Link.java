@@ -1,4 +1,4 @@
-package com.tus.network.graph;
+package com.tus.network.graph.link;
 
 public class Link {
     public final Integer from;

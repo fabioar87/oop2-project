@@ -1,4 +1,4 @@
-package com.tus.network.graph;
+package com.tus.network.graph.link;
 
 public class WeightedLink extends Link implements Comparable<WeightedLink> {
     public final Double weight;

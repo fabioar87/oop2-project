@@ -1,5 +1,7 @@
 package com.tus.network.graph;
 
+import com.tus.network.graph.link.Link;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;

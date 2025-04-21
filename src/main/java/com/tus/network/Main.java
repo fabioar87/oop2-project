@@ -27,7 +27,7 @@ public class Main {
         hyperLoopNetwork.addLink("Dublin", "Belfast", 170.0);
         hyperLoopNetwork.addLink("Galway", "Limerick", 105.0);
 
-        logger.info(String.valueOf(hyperLoopNetwork));
+        logger.info("\n\n" + String.valueOf(hyperLoopNetwork));
         logger.info("Network optimizer");
     }
 }
