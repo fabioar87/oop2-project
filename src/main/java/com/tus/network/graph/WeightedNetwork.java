@@ -2,10 +2,9 @@ package com.tus.network.graph;
 
 import com.tus.network.graph.link.WeightedLink;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.PriorityQueue;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 public class WeightedNetwork<N> extends Network<N, WeightedLink> {
     public WeightedNetwork(List<N> nodes){
@@ -25,6 +24,16 @@ public class WeightedNetwork<N> extends Network<N, WeightedLink> {
         addLink(getIndexOf(from), getIndexOf(to), weight);
     }
 
+// TODO: In this particular case, the WeightedLink class needs to be converted to a record
+//    public void addLink(Object link){
+//        if(link instanceof WeightedLink(var from, var to, var weight)) {
+//            links.get(from).add(new WeightedLink(from, to, weight));
+//            links.get(to).add(new WeightedLink(to, from, weight));
+//        } else {
+//            throw new IllegalArgumentException("Invalid link type");
+//        }
+//    }
+
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
@@ -41,58 +50,89 @@ public class WeightedNetwork<N> extends Network<N, WeightedLink> {
     }
 
     public DjikstraResult shortestPath(N root){
-        Integer rootIndex = getIndexOf(root);
-        Double[] distances = new Double[getNodesCount()];
-        distances[rootIndex] = 0.0;
+        return switch (getIndexOf(root)){
+            case Integer rootIndex when rootIndex >= 0 -> {
+                double[] distances = new double[getNodesCount()];
+                Arrays.fill(distances, Double.POSITIVE_INFINITY);
+                distances[rootIndex] = 0.0;
 
-        Boolean[] visited = new Boolean[getNodesCount()];
-        visited[rootIndex] = true;
+                boolean[] visited = new boolean[getNodesCount()];
+                visited[rootIndex] = true;
 
-        HashMap<Integer, WeightedLink> path = new HashMap<>();
-        PriorityQueue<DjikstraNode> queue = new PriorityQueue<>();
-        queue.offer(new DjikstraNode(rootIndex, 0.0));
+                HashMap<Integer, WeightedLink> path = new HashMap<>();
+                PriorityQueue<DjikstraNode> queue = new PriorityQueue<>();
+                queue.offer(new DjikstraNode(rootIndex, 0.0));
 
-        while (!queue.isEmpty()){
-            Integer node = queue.poll().node;
-            Double distanceNode = distances[node];
-            for (WeightedLink link : getLinksOf(node)){
-                Double distTo = distances[link.to];
-                Double newDist = distanceNode + link.weight;
-                if (!visited[link.to] || (distTo > newDist)){
-                    visited[link.to] = true;
-                    distances[link.to] = newDist;
-                    path.put(link.to, link);
-                    queue.offer(new DjikstraNode(link.to, newDist));
+                while (!queue.isEmpty()){
+                    Integer node = queue.poll().node;
+                    Double distanceNode = distances[node];
+                    for (WeightedLink link : getLinksOf(node)){
+                        Double distTo = distances[link.to];
+                        Double newDist = distanceNode + link.weight;
+                        if (!visited[link.to] || (distTo > newDist)){
+                            visited[link.to] = true;
+                            distances[link.to] = newDist;
+                            path.put(link.to, link);
+                            queue.offer(new DjikstraNode(link.to, newDist));
+                        }
+                    }
                 }
+                yield new DjikstraResult(distances, path);
             }
-        }
-        return new DjikstraResult(distances, path);
+            case null -> throw new IllegalArgumentException("Node not found in the network");
+            default -> throw new IllegalArgumentException("Invalid node index");
+        };
     }
 
-    public static final class DjikstraNode implements Comparable<DjikstraNode> {
-        public final Integer node;
-        public final Double distance;
-
-        public DjikstraNode(Integer node, Double distance){
-            this.node = node;
-            this.distance = distance;
-        }
+    public static record DjikstraNode(Integer node, Double distance)
+        implements Comparable<DjikstraNode> {
 
         @Override
         public int compareTo(DjikstraNode o) {
-            Double thisDistance = distance;
-            Double otherDistance = o.distance;
-            return thisDistance.compareTo(otherDistance);
+            return distance.compareTo(o.distance);
         }
     }
 
-    public static final class DjikstraResult {
-        public final Double[] distances;
-        public final HashMap<Integer, WeightedLink> path;
-
-        public DjikstraResult(Double[] distances, HashMap<Integer, WeightedLink> path){
-            this.distances = distances;
-            this.path = path;
+    public static record DjikstraResult(double[] distances, HashMap<Integer, WeightedLink> path) {
+        public Optional<Double> getDistanceTo(Integer node){
+            return switch(this) {
+                case DjikstraResult(var dist, var p)
+                    when node >= 0 && node < dist.length -> Optional.of(dist[node]);
+                default -> Optional.empty();
+            };
         }
+    }
+
+    // Method to compile the results of the Dijkstra algorithm
+    public Map<N, Double> compileResults(double[] distances){
+//  Note: original implementation
+//        HashMap<N, Double> result = new HashMap<>();
+//        for (int i = 0; i < distances.length; i++) {
+//            result.put(getNodeAt(i), distances[i]);
+//        }
+//        return result;
+//  Using modern Java Instream feature:
+        return IntStream.range(0, distances.length)
+                .boxed()
+                .collect(Collectors.toMap(
+                        this::getNodeAt,
+                        i -> distances[i],
+                        (a,b) -> a,
+                        HashMap::new
+                ));
+    }
+
+    public static List<WeightedLink> optimizedPath(Integer start, Integer end, Map<Integer, WeightedLink> path){
+        if(path.size() == 0) return List.of();
+
+        LinkedList<WeightedLink> result = new LinkedList<>();
+        WeightedLink link = path.get(end);
+        result.add(link);
+        while (link.from != start){
+            link = path.get(link.from);
+            result.add(link);
+        }
+        Collections.reverse(result);
+        return result;
     }
 }
