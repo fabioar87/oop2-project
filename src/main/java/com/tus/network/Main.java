@@ -14,6 +14,24 @@ public class Main {
     public static void main(String[] args) {
         logger.info("Testing network implementation");
 
+        WeightedNetwork<String> hyperLoopNetwork = returnHyperLoopNetwork();
+
+        logger.info("\n\n" + String.valueOf(hyperLoopNetwork));
+        logger.info("Network optimizer");
+
+        WeightedNetwork.DjikstraResult result = hyperLoopNetwork.shortestPath("Dublin");
+        Map<String, Double> distances = hyperLoopNetwork.compileResults(result.distances());
+        logger.info("Shortest path from Dublin to other cities:");
+        distances.forEach((city, distance) -> logger.info(city + " -> " + distance));
+
+        logger.info("Shortest path route from Dublin to Galway: ");
+        List<WeightedLink> path = hyperLoopNetwork.optimizedPath(hyperLoopNetwork.getIndexOf("Dublin"),
+                hyperLoopNetwork.getIndexOf("Galway"), result.path());
+        path.forEach(link -> logger.info(
+                hyperLoopNetwork.getNodeAt(link.from) + " -> " + hyperLoopNetwork.getNodeAt(link.to)));
+    }
+
+    private static WeightedNetwork<String> returnHyperLoopNetwork() {
         WeightedNetwork<String> hyperLoopNetwork = new WeightedNetwork<>(
                 List.of(
                 "Dublin",
@@ -28,19 +46,6 @@ public class Main {
         hyperLoopNetwork.addLink("Limerick", "Belfast", 300.0);
         hyperLoopNetwork.addLink("Dublin", "Belfast", 170.0);
         hyperLoopNetwork.addLink("Galway", "Limerick", 105.0);
-
-        logger.info("\n\n" + String.valueOf(hyperLoopNetwork));
-        logger.info("Network optimizer");
-
-        WeightedNetwork.DjikstraResult result = hyperLoopNetwork.shortestPath("Dublin");
-        Map<String, Double> distances = hyperLoopNetwork.compileResults(result.distances());
-        logger.info("Shortest path from Dublin to other cities:");
-        distances.forEach((city, distance) -> logger.info(city + " -> " + distance));
-
-        logger.info("Shortest path from Dublin to Galway: ");
-        List<WeightedLink> path = hyperLoopNetwork.optimizedPath(hyperLoopNetwork.getIndexOf("Dublin"),
-                hyperLoopNetwork.getIndexOf("Galway"), result.path());
-        path.forEach(link -> logger.info(
-                hyperLoopNetwork.getNodeAt(link.from) + " -> " + hyperLoopNetwork.getNodeAt(link.to)));
+        return hyperLoopNetwork;
     }
 }

@@ -6,6 +6,8 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import static java.lang.StringTemplate.STR;
+
 public class WeightedNetwork<N> extends Network<N, WeightedLink> {
     public WeightedNetwork(List<N> nodes){
         super(nodes);
@@ -79,8 +81,8 @@ public class WeightedNetwork<N> extends Network<N, WeightedLink> {
                 }
                 yield new DjikstraResult(distances, path);
             }
-            case null -> throw new IllegalArgumentException("Node not found in the network");
-            default -> throw new IllegalArgumentException("Invalid node index");
+            case null -> throw new IllegalArgumentException(STR."Node \{root} not found in the network");
+            default -> throw new IllegalArgumentException(STR."Invalid node index for \{root}");
         };
     }
 
